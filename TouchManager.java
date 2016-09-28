@@ -62,18 +62,18 @@ public class TouchManager{
                 //performed = true;
                 if(Math.abs(dx) > Math.abs(dy)){
                     if(dx > 0){
-                        GameConstants.controller.direction = ChessPiece.PieceDirection.RIGHT;
+                        GameConstants.controller.direction = GameConstants.Direction.RIGHT;
                         break;
                     }else{
-                        GameConstants.controller.direction = ChessPiece.PieceDirection.LEFT;
+                        GameConstants.controller.direction = GameConstants.Direction.LEFT;
                         break;
                     }
                 }
                 if(dy > 0){
-                    GameConstants.controller.direction = ChessPiece.PieceDirection.DOWN;
+                    GameConstants.controller.direction = GameConstants.Direction.DOWN;
                     break;
                 }
-                GameConstants.controller.direction = ChessPiece.PieceDirection.UP;
+                GameConstants.controller.direction = GameConstants.Direction.UP;
                 break;
         }
         return true;

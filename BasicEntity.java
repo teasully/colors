@@ -1,6 +1,5 @@
 package project.etrumper.thomas.ghostbutton;
 
-import android.opengl.Matrix;
 import android.util.Log;
 
 /**
@@ -12,7 +11,7 @@ public class BasicEntity extends Logable {
 
     int ID; // Unique ID
 
-    float[] position, velocity, rotation, scale;
+    float[] position, rotation, scale;
 
     float positionalVelocity, anglarVelocity, scalingVelocity,  // For changing values
             deltaTimeModifier;  // For changing speed of change
@@ -23,19 +22,18 @@ public class BasicEntity extends Logable {
 
     RawModel model;
 
-    Ease ease;  // For moving from one place to another
-
     Animation[] animations;
+
+    Ease2 easeYPos;
 
     BasicEntity(String libraryObjectName) {
         super(libraryObjectName);
 
         this.ID = IDCounter++;
 
-        this.position = new float[3];
-        this.velocity = new float[9];   // 3 coords + 3 angulars + 3 scalar
-        this.rotation = new float[3];
-        this.scale = new float[3];
+        this.position = new float[]{0f, 0f, 0f};
+        this.rotation = new float[]{270f, 0f, 0f};
+        this.scale = new float[]{1f, 1f, 1f};
 
         this.deltaTimeModifier = 1.f;   // Time modifier for slowing + speed
 
@@ -49,37 +47,21 @@ public class BasicEntity extends Logable {
     }
 
     protected void update() {
+
         // Update animations
         for (Animation animation : this.animations) {
             animation.update();
         }
-        // Update ease
-        if (this.ease != null) {
-            this.ease.update(new float[]{SuperManager.deltaTime * deltaTimeModifier});
-            float[] positionalVelocity = ease.getData(new float[]{this.position[0], this.position[1], this.position[2], 0});/*/,
-                    angularVelocity = ease.getData(new float[]{this.rotation[0], this.rotation[1], this.rotation[2], 1}),
-                    scalingVelocity = ease.getData(new float[]{this.scale[0], this.scale[1], this.scale[2], 2});*/
-            this.velocity = new float[]{positionalVelocity[0], positionalVelocity[1], positionalVelocity[2]};/*/,
-                    angularVelocity[0], angularVelocity[1], angularVelocity[2],
-                    scalingVelocity[0], scalingVelocity[1], scalingVelocity[2]};*/
-        }
-        // Update tilePosition | rotation | scale with velocity data
-        if (this.velocity[0] != 0 || this.velocity[1] != 0 || this.velocity[2] != 0) {
-            movePosition(new float[]{this.velocity[0], this.velocity[1], this.velocity[2]});
-        }
-        /*if (this.velocity[3] != 0 || this.velocity[4] != 0 || this.velocity[5] != 0) {
-            moveRotation(new float[]{this.velocity[3], this.velocity[4], this.velocity[5]});
-        }
-        if (this.velocity[6] != 0 || this.velocity[7] != 0 || this.velocity[8] != 0) {
-            moveScale(new float[]{this.velocity[6], this.velocity[7], this.velocity[8]});
-        }*/
-        /*/ Fix rotation so it does not go above 360 or under 0 just for numbers' sake
-        for (int i = 0; i < 3; i++) {
-            if (rotation[i] >= 360f || rotation[i] < 0f) {
-                rotation[i] %= 360;
+        // Check model data
+        this.updateMesh();
+        // Check eases
+        if (this.easeYPos != null) {
+            this.easeYPos.update();
+            this.position[1] = (float) this.easeYPos.easeLinear();
+            if (this.easeYPos.done()) {
+                this.easeYPos = null;
             }
         }
-        */
     }
 
     protected void changeDeltaTimeModifier(float newModifier) {
@@ -138,6 +120,20 @@ public class BasicEntity extends Logable {
         int number = SuperManager.r.nextInt() % numberDivisions;
         float addRot = ((float) number / (float) numberDivisions) * 360.f;
         this.rotation[rotIndex] = addRot;
+    }
+
+    protected Sound loadSound(int rID){
+        Sound s = null;
+        try {
+            s = SoundManager.loadSound(rID);
+        }catch(MandatoryException e){
+            LOGE(e.toString());
+        }
+        return s;
+    }
+
+    protected void startYEase(float desiredChange, long timeInMilli){
+        this.easeYPos = new Ease2(this.position[1], desiredChange, timeInMilli);
     }
 
     /*protected void queueModel(String name){
@@ -219,14 +215,6 @@ public class BasicEntity extends Logable {
         }
         return model.getModelMatrixWithGlobal(this.tilePosition, this.rotation, this.scale);
     }*/
-
-    protected void startEase(float[] destination, long timeInMilli, int mode) {
-        Ease.startEase(destination, this, timeInMilli, mode);
-    }
-
-    protected void startEase(float[] destination, long timeInMilli) {
-        this.startEase(destination, timeInMilli, 0);
-    }
 
     protected void pointCameraTo(){
         GameConstants.camera.target = new float[]{this.position[0], this.position[1], this.position[2]};

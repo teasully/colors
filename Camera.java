@@ -11,7 +11,7 @@ public class Camera extends BasicEntity {
             offset; // Used for shake
     float intensity; // Higher numbers make less shake
 
-    long shakeTimer;
+    private long shakeTimer;
 
     Ease2 targetX, targetY, targetZ,
             upVectorX, upVectorY, upVectorZ,
@@ -34,7 +34,7 @@ public class Camera extends BasicEntity {
         this.offset = new float[3];
 
         this.shakeTimer = 0;
-        this.intensity = 50.f;
+        this.intensity = 1000f; // Bigger number = less intense
 
         rotation = new float[]{0f, 0f, 0f};
         position = new float[]{0f, 0f, 0f};
@@ -49,8 +49,8 @@ public class Camera extends BasicEntity {
         // Check if camera should be shaken
         if (this.shakeTimer > 0) {
             this.shakeTimer -= SuperManager.deltaTime;
-            int r1 = SuperManager.r.nextInt() % 40,
-                    r2 = SuperManager.r.nextInt() % 20;
+            int r1 = SuperManager.r.nextInt() % 100,
+                    r2 = SuperManager.r.nextInt() % 100;
             this.offset[0] = (float) r1 / this.intensity;
             this.offset[1] = (float) r2 / this.intensity;
         } else {
@@ -129,7 +129,7 @@ public class Camera extends BasicEntity {
     protected void updateCamera() {
         Matrix.setLookAtM(viewMatrix, // Output
                 0, // Output offset
-                position[0], position[1], position[2], // Camera tilePosition in world
+                position[0] + offset[0], position[1] + offset[1], position[2], // Camera tilePosition in world
                 target[0], target[1], target[2], // Target for camera to point towards
                 upVector[0], upVector[1], upVector[2]); // Sets the up vector
     }
@@ -163,8 +163,9 @@ public class Camera extends BasicEntity {
                 this.upVectorX != null || this.upVectorY != null || this.upVectorZ != null);
     }
 
-    protected void startShake(long time) {
+    protected void startShake(long time, float intensity) {
         this.shakeTimer = time;
+        this.intensity = intensity;
     }
 
 }

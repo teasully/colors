@@ -28,7 +28,7 @@ public class TextSelection extends Text {
         this.position[1] = ypos;
         // Space out letters
         int i = 0;
-        for (ChessPiece child : this.children) {
+        for (BasicEntity child : this.children) {
             child.position = new float[]{this.position[0] - (i * letter_spacing * super.scaleModifier), this.position[1], this.position[2]};
             i++;
         }
@@ -36,7 +36,7 @@ public class TextSelection extends Text {
         this.options[Overlay.getRemainder(currentSelection, this.options.length)].update(ypos);
         // Space out letters
         i = 0;
-        for (ChessPiece child : this.options[Overlay.getRemainder(currentSelection, this.options.length)].children) {
+        for (BasicEntity child : this.options[Overlay.getRemainder(currentSelection, this.options.length)].children) {
             child.position = new float[]{this.position[0] - super.getLength() - (i * letter_spacing * super.scaleModifier) - this.word_spacing * super.scaleModifier, this.position[1], this.position[2]};
             i++;
         }
@@ -44,9 +44,6 @@ public class TextSelection extends Text {
 
     @Override
     protected void draw(){
-        if(MaterialManager.getColor("Letter") == WeaponColor.GREEN) {
-            MaterialManager.changeMaterialColor("Letter",MaterialManager.getVector3fColor("Green"));
-        }
         this.options[Overlay.getRemainder(currentSelection, this.options.length)].draw();
         MaterialManager.changeMaterialColor("Letter",MaterialManager.getVector3fColor("Red"));
         super.draw();

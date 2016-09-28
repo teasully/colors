@@ -3,10 +3,10 @@ package project.etrumper.thomas.ghostbutton;
 /**
  * Created by thoma on 6/14/2016.
  */
-public class Letter extends ChessPiece {
+public class Letter extends BasicEntity {
 
     Letter(String libraryObjectName, final String letter){
-        super(libraryObjectName, PieceDirection.DOWN, PieceType.STATIONARY);
+        super(libraryObjectName);
 
         // Check if current letter is apace
         if(libraryObjectName == null && letter == null){
@@ -23,7 +23,6 @@ public class Letter extends ChessPiece {
             return;
         }
         super.update();
-        super.updateMesh();
     }
 
     @Override

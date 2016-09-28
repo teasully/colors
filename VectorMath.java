@@ -68,6 +68,7 @@ public class VectorMath {
         return new float[]{};
     }
 
+
     public static float[] combineVectors(float[] ... params){
         int numElements = 0;
         for(float[] array : params){

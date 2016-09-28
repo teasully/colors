@@ -7,7 +7,7 @@ package project.etrumper.thomas.ghostbutton;
 
 public class Controller extends BasicEntity{
 
-    ChessPiece.PieceDirection direction;
+    GameConstants.Direction direction;
 
     boolean justPressed,
             justReleased;
@@ -31,80 +31,25 @@ public class Controller extends BasicEntity{
 
     @Override
     protected void update() {
-        // Make sure no menu is showing
-        if (Overlay.currentScreen != Overlay.CurrentScreen.OVERLAY_ONLY) {
+        // If menu is showing, handle menu input, otherwise handle game input
+        if (Overlay.hasMenu()) {
             this.handleTextMenu();
-        }
-        // Send input to level editor
-        else {
-            GameConstants.editor.handleInput();
+        }else{
+            this.handleGameInput();
         }
     }
 
-    private void handleGameInput(TileMap3D ... map1){
-        TileMap3D map = map1[0];
-        // Handle game input
-        if (this.justPressed) {
+    //float y = (TouchManager.y / SuperManager.height);
+
+    private void handleGameInput(){
+        // Check if controller has input
+        if(this.justPressed){
             this.justPressed = false;
-            float y = (TouchManager.y / SuperManager.height);
-            Overlay.pressed = 0;
-            if (y >= 0.8f) {
-                //sButtonPress.play();
-                float x = (TouchManager.x / SuperManager.width);
-                if (x <= 0.25f) {
-                    map.inputHandler("left_button");
-                    Overlay.pressed = 1;
-                } else if (x <= 0.50f) {
-                    map.inputHandler("middle_l_button");
-                    Overlay.pressed = 2;
-                } else if (x <= 0.75f) {
-                    map.inputHandler("middle_r_button");
-                    Overlay.pressed = 3;
-                } else {
-                    map.inputHandler("right_button");
-                    Overlay.pressed = 4;
-                }
-            }
-            // Check pause button
-            else if(y <= 0.1f){
-                float x = (TouchManager.x / SuperManager.width);
-                if(x <= 0.15f) {
-                    // Pause button pressed
-                    Overlay.pressed = 5;
-                    sButtonPress.play();
-                }
-            }
-        }
-        if(this.justReleased){
-            this.justReleased = false;
-            // Check if overlay had something selected
-            if(Overlay.pressed != 0){
-                // Check for super jump cases
-                switch(Overlay.pressed){
-                    // High jump released
-                    case(2):
-                        map.inputHandler("middle_l_button_release");
-                        break;
-                    // Long jump released
-                    case(3):
-                        map.inputHandler("middle_r_button_release");
-                        break;
-                }
-                // Play sound to deselect
-                if(Overlay.pressed == 5) {
-                    sButtonPress.play();
-                }
-            }
-            Overlay.pressed = 0;
-            // Check if needs pausing; tapped on top of screen
-            float y = (TouchManager.y / SuperManager.height);
-            if(y <= 0.1f) {
-                float x = (TouchManager.x / SuperManager.width);
-                if (x <= 0.15f) {
-                    // Tell Overlay to pause
-                    Overlay.handleMultiTap(2);
-                }
-            }
+            // Get column using screen position as percentage multiplied by number of columns
+            float x = (TouchManager.x / SuperManager.width);
+            int column = (int)(x * GameConstants.numberColumns);
+            // Send column data to tapperManager
+            GameConstants.tappers.handleColumnTap(column);
         }
     }
 
@@ -122,7 +67,7 @@ public class Controller extends BasicEntity{
             // Play button press sound
             sButtonPress.play();
         }
-        Overlay.currentMenu.selcted = selection;
+        Overlay.currentMenu.selected = selection;
         // Send tap release to menu
         if(this.justReleased && selection != -1){
             this.justReleased = false;
@@ -131,7 +76,7 @@ public class Controller extends BasicEntity{
             // Fix double tap
             this.justPressed = false;
             // Send null if justReleased, no cameraDirection
-            Overlay.currentMenu.tapped(null);
+            Overlay.currentMenu.tapped();
         }
     }
 }

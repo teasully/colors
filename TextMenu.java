@@ -3,32 +3,27 @@ package project.etrumper.thomas.ghostbutton;
 /**
  * Created by thoma on 6/14/2016.
  */
-public class TextMenu extends ChessPiece {
+public class TextMenu extends BasicEntity {
 
-    enum MenuType {
-        VERTICAL_STANDARD
-    }
+    Text prompt;
 
-    Text prompt, pointer;
-
-    MenuType menuType;
-
-    int selcted;
+    int selected;
 
     Sound sSelect;
 
+    BasicEntity[] children;
+
     TextMenu(String prompt, String... options) {
-        super("TextMenu." + prompt, null, PieceType.STATIONARY);
+        super("TextMenu." + prompt);
         // Create prompt and make larger
         this.prompt = new Text(prompt);
         this.prompt.changeScale(0.5f);
-        // Create current selection pointer
-        this.pointer = new Text(">");
         // Set the default selection to 0
-        this.selcted = 0;
+        this.selected = -1;
         // Load sounds
         this.sSelect = super.loadSound(R.raw.tick1);
         // Add selections
+        this.children = new BasicEntity[0];
         for (String option : options) {
             addChild(new Text(option));
         }
@@ -48,12 +43,12 @@ public class TextMenu extends ChessPiece {
         float currenty = 3.5f,
                 dy = -1f;
         // Update prompt
-        prompt.position[0] = this.position[0] + (prompt.getLength() / 2f - 1f);
+        prompt.centerX(this.position[0]);
         prompt.update(this.position[1] + currenty);
         prompt.position[2] = this.position[2];
         currenty += (dy * (this.prompt.scaleModifier + 1f));
         // Update selections
-        for (ChessPiece selection : this.children) {
+        for (BasicEntity selection : this.children) {
             // Cast the Text to use custom update function for y-pos
             Text text = (Text) selection;
             text.position[0] = this.position[0] + (text.getLength() / 2f - 0.5f);
@@ -61,18 +56,6 @@ public class TextMenu extends ChessPiece {
             text.position[2] = this.position[2];
             currenty += (dy * (text.scaleModifier + 1f));
         }
-        // Update pointer
-        if(this.getSelection() != -1) {
-            Text selection = (Text) this.children[this.getSelection()];
-            this.pointer.position[0] = this.position[0] + selection.getLength() / 2f + 0.75f;
-            // Add spin
-            this.pointer.rotation[0] += SuperManager.deltaTime / 5.f;
-            this.pointer.update(selection.position[1]);
-        }else{
-            // Place pointer out of screen
-            pointer.update(10);
-        }
-        pointer.position[2] = this.position[2];
     }
 
     @Override
@@ -85,12 +68,10 @@ public class TextMenu extends ChessPiece {
         MaterialManager.changeMaterialColor("Letter",MaterialManager.getVector3fColor("Blue"));
         this.prompt.draw();
         int i = 0;
-        for (ChessPiece selection : this.children) {
+        for (BasicEntity selection : this.children) {
             // Draw the selected text green and the unselected red
             if (this.getSelection() != -1 && this.getSelection() == i) {
                 MaterialManager.changeMaterialColor("Letter",MaterialManager.getVector3fColor("Green"));
-                // Draw pointer when drawing selection
-                this.pointer.draw();
             } else {
                 MaterialManager.changeMaterialColor("Letter",MaterialManager.getVector3fColor("Red"));
             }
@@ -101,35 +82,35 @@ public class TextMenu extends ChessPiece {
         }
     }
 
-    protected void tapped(PieceDirection direction){
+    protected void tapped(){
         //Check selections
         switch(this.getSelection()){
             case(0):
-                this.tapped0(direction);
+                this.tapped0();
                 break;
             case(1):
-                this.tapped1(direction);
+                this.tapped1();
                 break;
             case(2):
-                this.tapped2(direction);
+                this.tapped2();
                 break;
             case(3):
-                this.tapped3(direction);
+                this.tapped3();
                 break;
             case(4):
-                this.tapped4(direction);
+                this.tapped4();
                 break;
             case(5):
-                this.tapped5(direction);
+                this.tapped5();
                 break;
             case(6):
-                this.tapped6(direction);
+                this.tapped6();
                 break;
             case(7):
-                this.tapped7(direction);
+                this.tapped7();
                 break;
             case(8):
-                this.tapped8(direction);
+                this.tapped8();
                 break;
             // Catch unhandled taps
             default:
@@ -139,105 +120,61 @@ public class TextMenu extends ChessPiece {
     }
 
     protected int getSelection(){
-        return this.selcted;
+        return this.selected;
     }
 
-    protected Text handleTextSelection(ChessPiece child, PieceDirection direction){
+    protected Text handleTextSelection(BasicEntity child) {
         Text text = (Text) child;
-        if(text.isTextSelection()) {
+        if (text.isTextSelection()) {
             TextSelection textSelection = (TextSelection) text;
-            // Change if tap
-            if (direction == null) {
-                textSelection.currentSelection++;
-            }
+            textSelection.currentSelection++;
         }
         return text;
     }
 
-    protected void tapped0(PieceDirection direction){
-        if(direction == null){
-            this.tapped0();
+    protected void addChild(BasicEntity piece){
+        for(BasicEntity piece1 : this.children){
+            if(piece.ID == piece1.ID){
+                LOGE("Trying to add duplicate chess piece");
+                return;
+            }
         }
+        BasicEntity[] np = new BasicEntity[this.children.length + 1];
+        System.arraycopy(this.children, 0, np, 0, this.children.length);
+        this.children = np;
+        this.children[this.children.length - 1] = piece;
     }
 
     protected void tapped0(){
 
     }
 
-    protected void tapped1(PieceDirection direction){
-        if(direction == null){
-            this.tapped1();
-        }
-    }
-
     protected void tapped1(){
 
-    }
-
-    protected void tapped2(PieceDirection direction){
-        if(direction == null){
-            this.tapped2();
-        }
     }
 
     protected void tapped2(){
 
     }
 
-    protected void tapped3(PieceDirection direction){
-        if(direction == null){
-            this.tapped3();
-        }
-    }
-
     protected void tapped3(){
 
-    }
-
-    protected void tapped4(PieceDirection direction){
-        if(direction == null){
-            this.tapped4();
-        }
     }
 
     protected void tapped4(){
 
     }
 
-    protected void tapped5(PieceDirection direction){
-        if(direction == null){
-            this.tapped5();
-        }
-    }
-
     protected void tapped5(){
 
-    }
-
-    protected void tapped6(PieceDirection direction){
-        if(direction == null){
-            this.tapped6();
-        }
     }
 
     protected void tapped6(){
 
     }
 
-    protected void tapped7(PieceDirection direction){
-        if(direction == null){
-            this.tapped7();
-        }
-    }
-
     protected void tapped7(){
 
-    }
-
-    protected void tapped8(PieceDirection direction){
-        if(direction == null){
-            this.tapped8();
-        }
     }
 
     protected void tapped8(){

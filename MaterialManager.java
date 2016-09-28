@@ -17,7 +17,7 @@ public class MaterialManager{
 
     public static void init() {
         materials = new Material[0];
-        // Basic colors
+        // Basic COLORS
         newMaterial("LightBlue", new float[]{0.1f, 0.1f, 0.8f});
         newMaterial("Black", new float[]{0.2f, 0.2f, 0.2f});
         newMaterial("Grey", new float[]{0.47f, 0.47f, 0.47f});
@@ -26,6 +26,7 @@ public class MaterialManager{
         newMaterial("Red", new float[]{0.8f, 0.f, 0.f});
         newMaterial("Green", new float[]{0.f, 0.8f, 0.f});
         newMaterial("Blue", new float[]{0.f, 0.f, 0.8f});
+        newMaterial("Brown", new float[]{.2f, .1f, 0.1f});
         // Palette one
         yankeePalette1 = new ColorPalette("Yankee Blue Palette", null);
         yankeePalette1.addColors(
@@ -38,7 +39,7 @@ public class MaterialManager{
         // Set current palette
         currentPalette = yankeePalette1;
         // Engine materials
-        newMaterial("Letter", "test", new float[]{.9f, 0.5f, 0.9f});
+        newMaterial("Letter", new float[]{.9f, 0.5f, 0.9f});
         // Game materials
         newMaterial("Cube", new float[]{0.6f, 0.1f, 0.f});
         newMaterial("Wall", new float[]{39f / 255f, 33f / 255f, 60f / 255f});
@@ -66,16 +67,6 @@ public class MaterialManager{
         float opacity = materials[index].opacity;
 
         materials[index] = new Material(matName, programName, new LightProperties(color.vector, color.vector, color.vector), GameConstants.defaultShininess, opacity);
-    }
-
-    public static ChessPiece.WeaponColor getColor(String materialName){
-        LightProperties properties = getMaterial(materialName).lightProperties;
-        if(properties == getMaterial("Red").lightProperties){
-            return ChessPiece.WeaponColor.RED;
-        }else if(properties == getMaterial("Blue").lightProperties){
-            return ChessPiece.WeaponColor.BLUE;
-        }
-        return ChessPiece.WeaponColor.GREEN;
     }
 
     public static boolean isMaterial(String materialName) {
@@ -111,6 +102,7 @@ public class MaterialManager{
     public static Vector3f getVector3fColor(String mat){
         Material material = getMaterial(mat);
         if(material == null){
+            Log.e("MaterialManager", "Material not found, returning null");
             return null;
         }
         return new Vector3f(material.lightProperties.diffuse);

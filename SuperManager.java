@@ -2,9 +2,11 @@ package project.etrumper.thomas.ghostbutton;
 
 import android.content.Context;
 import android.os.AsyncTask;
+import android.os.SystemClock;
 import android.util.Log;
 
 import java.util.Random;
+import java.util.concurrent.SynchronousQueue;
 
 /**
  * Created by thoma on 2/10/2016.
@@ -46,11 +48,17 @@ public class SuperManager{//} extends AsyncTask<Void, Void, Void> {
         //LightManager.addLight(new Light("Light 1", new float[]{10f, 10f, 10f}));
 
         MeshManager.registerLibraries(
-                "cubemonster_library",
                 "scenery1_library",
-                "letters_library");
+                "letters_library",
+                "tapper_library");
 
         GameConstants.camera = new Camera();
+        // Move camera to origin
+        GameConstants.camera.position = new float[]{0f, 0f, 0f};
+        GameConstants.camera.target = new float[]{0f, 0f, 1f};
+        GameConstants.camera.upVector = new float[]{0f, 1f, 0f};
+        // Update with new info
+        GameConstants.camera.updateCamera();
 
         FPS = GameConstants.frameRate;
         desiredWait = (long)(1000f / FPS);
@@ -65,9 +73,8 @@ public class SuperManager{//} extends AsyncTask<Void, Void, Void> {
         GameConstants.init();
     }
 
-    static Random r = new Random(SuperManager.globalTime);
+    static Random r = new Random(System.currentTimeMillis());
 
-    //protected Void doInBackground(Void ... params){
     protected static void update() {
         // while(true) {
         /*/ Calculate frame maths
@@ -76,27 +83,13 @@ public class SuperManager{//} extends AsyncTask<Void, Void, Void> {
         } catch (MandatoryException e) {
             Log.e("SuperManager", e.toString());
         }*/
-        // If playing, update tile map elements
-        if (Overlay.currentScreen == Overlay.CurrentScreen.OVERLAY_ONLY) {
-            if(GameConstants.tileMap3D != null) {
-                GameConstants.tileMap3D.update();
-            }
-        }
         // Update game constants and lights
         GameConstants.update();
         LightManager.updateLights();
         // Update overlay
         Overlay.update();
-
-        //
-        //
+        // Set constant delta time because Android devices refresh at 60FPS
         deltaTime = (long)(1000f / 60f);
-        //Log.e("",""+deltaTime);
-        //if(isCancelled()){
-        //      break;
-        //  }
-        // }
-        // return null;
     }
 
     protected static boolean shouldDrawF(){
@@ -169,6 +162,14 @@ public class SuperManager{//} extends AsyncTask<Void, Void, Void> {
             return total / MAXBUF;
         }
         return -1f;
+    }
+
+    static int getRandomInt(int range){
+        int numLoops = Math.abs(r.nextInt() % 50);
+        while(numLoops-- > 0){
+            r.nextInt();
+        }
+        return Math.abs(r.nextInt() % range);
     }
 
     /*static float[] getAttributeMVP(BasicEntity entity, int attributeIndex, Camera camera){

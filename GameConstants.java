@@ -1,9 +1,6 @@
 package project.etrumper.thomas.ghostbutton;
 
 import android.util.Log;
-import android.util.StringBuilderPrinter;
-
-import java.security.acl.LastOwnerException;
 
 /**
  * Created by thoma on 6/20/2016.
@@ -11,30 +8,51 @@ import java.security.acl.LastOwnerException;
  */
 public class GameConstants {
 
-    static int Number_Colors = 1;    // Difficulty
+    enum Direction{
+        LEFT,
+        RIGHT,
+        UP,
+        DOWN
+    }
+
+    static final String[] COLORS = new String[]{"Red", "Blue", "Green", "Black"};
+
     static float ambiance = 1f; // Amount of light (or RGB for more specific)
 
     static Camera camera;
-    static Editor editor;
     static float menuCameraZoom = 12f,
         defaultShininess = 1f;
+
+    static int Score;
+    static long timeLeftInMilli;
 
     static float[] sceneAmbience = new float[]{ambiance, ambiance, ambiance};
 
     static Controller controller;
 
-    static TileMap3D tileMap3D;
-
     static long frameRate = 60;
+
+    static int numberColumns; // Number of columns used for game
+    static GO_TapperManager.ManagerType mode;
+
+    static GO_Indicator indicator;
+    static GO_TapperManager tappers;
+    static GO_Timer timer;
+    static GO_ScoreCounter scoreCounter;
 
     public static void init(){
         controller = new Controller();
-        // Init editor
-        GameConstants.editor = new Editor(null);
         // Init overlay
         Overlay.init();
         // Load config
         loadGame();
+        // Init stuff
+        numberColumns = 3;
+        mode = GO_TapperManager.ManagerType.CASUAL;
+        indicator = new GO_Indicator();
+        tappers = new GO_TapperManager(mode);
+        timer = new GO_Timer();
+        scoreCounter = new GO_ScoreCounter();
     }
 
     public static void update() {
@@ -43,26 +61,38 @@ public class GameConstants {
         // Update camera
         camera.update();
         camera.updateCamera();
+        // Update GOs
+        if(!Overlay.hasMenu()) {
+            indicator.update();
+            tappers.update();
+            timer.update();
+            scoreCounter.update();
+        }
     }
 
-    public static void resetMap() {
-        // Reset tileMap
-        tileMap3D = new TileMap3D(Maps.W0L0, Maps.W0L1, Maps.W0L2, Maps.W0L3);
+    public static void newGame(){
+        Score = 0;
+        indicator = new GO_Indicator();
+        tappers = new GO_TapperManager(mode);
+        timer = new GO_Timer();
+        if(mode == GO_TapperManager.ManagerType.CASUAL) {
+            timeLeftInMilli = (long) (5 * 1000); // 10 seconds
+        }else if(mode == GO_TapperManager.ManagerType.RUSHED){
+            timeLeftInMilli = (long) (10 * 1000); // 10 seconds
+        }
+        scoreCounter.updateText();
+    }
+
+    public static void loseGame(){
+        Overlay.changeScreen(Overlay.CurrentScreen.LOSE);
     }
 
     public static void saveGame(){
         StringBuilder saveData = new StringBuilder("");
-        // Save the camera mode
-        int cameraMode = Overlay.optionsMenu.getData()[0];
-        saveData.append(String.format("camera_mode %s", cameraMode));
-        // Save current maps
-        String[] mapsBase64 = editor.getMapsBase64();
-        for(String map : mapsBase64){
-            saveData.append(String.format("&map %s", map));
-        }
+        // Add save data
+
         // Save to internal storage
         Loader.writeToFile(saveData.toString());
-        //LOGE("Saved game files");
     }
 
     public static void loadGame(){
@@ -76,30 +106,39 @@ public class GameConstants {
         for(String data : datum){
             String[] words = data.split(" ");
             switch (words[0]){
-                case("camera_mode"):
-                    TextSelection ts = (TextSelection) Overlay.optionsMenu.children[0];
-                    ts.currentSelection = Integer.parseInt(words[1]);
-                    break;
-                case("map"):
-                    editor.addMapBase64(words[1]);
-                    break;
                 default:
                     LOGE(String.format("Reading un-parsed line of code:\n%s", data));
                     break;
             }
         }
-        //LOGE("Loaded game files");
     }
 
-    public static TileMap3D getMap(){
-        // Check editor mode
-        if(GameConstants.editor.mode == Editor.EditorMode.TESTING){
-            return GameConstants.editor.testingMap;
-        }
-        return GameConstants.tileMap3D;
+    public static String getRandomColor(){
+        int i = Math.abs(SuperManager.r.nextInt() % numberColumns);
+        return COLORS[i];
     }
 
     private static void LOGE(String message){
         Log.e("GameConstants", message);
     }
 }
+
+
+/*
+
+3 button = 3 ingredients
+=SPAGHETTI
+Cheese
+Lasagna
+Sauce
+=ICE CREAM
+Chocolate
+Vanilla
+Strawberry
+=SANDWICH
+Meats
+Veggie
+Cheese
+
+
+ */

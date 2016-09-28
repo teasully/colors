@@ -53,6 +53,9 @@ public class Animation {
         this.animationIndex = MeshManager.getAnimationIndex(this.getObjectName(), this.getAnimationName());
         if(this.animationIndex == null){
             this.loaded = false;
+            //LOGE("animation index not found");
+        }else{
+            //LOGE("animation index found : " + animationIndex);
         }
     }
 

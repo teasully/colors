@@ -45,43 +45,21 @@ public class CustomGLRenderer implements GLSurfaceView.Renderer {
     public void onDrawFrame(GL10 gl) {
         // Update game elements via SuperManager
         SuperManager.update();
-        // Update editor
-        GameConstants.editor.update();
-        // Draw tile map
+        // Draw
         {
-            // Clear buffers
-            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
-            // Draw TileMap
-            GameConstants.editor.drawMap();
-            // Finish; draw the screen
-            GLES20.glFlush();
-        }
-        // Draw overlay
-        {
-            // Save camera defaults
-            float[] savePos = GameConstants.camera.position,
-                    saveTarget = GameConstants.camera.target,
-                    savedUp = GameConstants.camera.upVector;
-            // Move camera to origin
-            GameConstants.camera.position = new float[]{0f, 0f, 0f};
-            GameConstants.camera.target = new float[]{0f, 0f, 1f};
-            GameConstants.camera.upVector = new float[]{0f, 1f, 0f};
-            // Update with new info
-            GameConstants.camera.updateCamera();
             // Refresh depth buffer so drawn items do not go through scene
-            GLES20.glClear(GLES20.GL_DEPTH_BUFFER_BIT);
+            GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT | GLES20.GL_DEPTH_BUFFER_BIT);
             // Draw the overlay
             Overlay.draw();
-            // Draw editor
-            if(GameConstants.editor.mode != null){
-                GameConstants.editor.drawUI();
+            // Draw temp stuff for prototyping if no menus showing
+            if(!Overlay.hasMenu()) {
+                GameConstants.indicator.draw();
+                GameConstants.tappers.draw();
+                GameConstants.timer.draw();
+                GameConstants.scoreCounter.draw();
             }
             // Finish; draw the screen
             GLES20.glFlush();
-            // Revert camera
-            GameConstants.camera.position = savePos;
-            GameConstants.camera.target = saveTarget;
-            GameConstants.camera.upVector = savedUp;
         }
     }
 

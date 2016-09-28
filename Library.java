@@ -41,7 +41,7 @@ public class Library extends Logable{
     }
 
     public boolean setNotLoading(){
-        // Check to see if this has aready been set to not loading
+        // Check to see if this has already been set to not loading
         if(!this.loading){
             LOGE(String.format("Trying to set already loaded library %s as loaded", this.libraryName));
             return false;
